@@ -52,6 +52,10 @@ int[] getLinePosition(int colorTolerance, int[] calibratedColorBW, int[][] line)
 		avgColor= avgColor/5;
 		if(avgColor < (calibratedColorBW[1]+colorTolerance) && avgColor > (calibratedColorBW[1]-colorTolerance))
 		{
+			// do you need to include "if(inWhite==false)"? it is already defined as false and won't change. 
+			// correct me if im wrong but couldn't we just put " inWhite=true;
+			//						     whiteEndPts[0] = i;"
+			// and the same with down below
 			if(inWhite==false){inWhite=true;
 			whiteEndPts[0] = i;
 			}
@@ -106,6 +110,7 @@ int[] calibrateCamera(int[][][] inpImage)
 }
 void driveStraight(int speed, int timeS, int timeMS)
 {
+	// still need to define speed, timeS, and timeMS
 	return null;
 }
 void turn(int diff, int timeS, int timeMS)
