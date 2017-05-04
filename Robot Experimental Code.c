@@ -1,8 +1,11 @@
 #include <stdio.h>
 #include "E101.h"
 //APOLOGIEs FOR MY SHODDY CODE IN ADVANCE LOL
+int height = 120;
 int main()
 {
+	init();
+	int[][] cameraLine = getCameraLine(height, readCamera());
 	
 	
 	return null;
@@ -27,6 +30,12 @@ int[][][] readCamera()
 	//Cant remember E101.h api for take picture
 	//Assuming I can put the colour values into a 3d array 420/240 res containing 3 values for colour
 	int[][][] image = new int[240][420][3];
+}
+int getTurnScalar(int[] loc, int scale)
+{
+	int avgLoc = (int)((loc[0]+loc[1])/2);	
+	int turnDiff = avgLoc-209;
+	return turnDiff*scale;
 }
 int[] getLinePosition(int colorTolerance, int[] calibratedColorBW, int[][] line)
 {
@@ -56,6 +65,9 @@ int[] getLinePosition(int colorTolerance, int[] calibratedColorBW, int[][] line)
 			// correct me if im wrong but couldn't we just put " inWhite=true;
 			//						     whiteEndPts[0] = i;"
 			// and the same with down below
+			//this will ensure that the code below will only run once, when it runs for the first time it will set inWhite to be true
+			//and it won't run it again if it detects white pixels. It should only record the beginning point of the white pixels
+			//along the horizontal axis of the image.
 			if(inWhite==false){inWhite=true;
 			whiteEndPts[0] = i;
 			}
@@ -111,9 +123,14 @@ int[] calibrateCamera(int[][][] inpImage)
 void driveStraight(int speed, int timeS, int timeMS)
 {
 	// still need to define speed, timeS, and timeMS
-	return null;
+	set_motor(1,speed);
+	set_motor(2, speed);
+	sleep1(timeS, timeMS);
+	
 }
 void turn(int diff, int timeS, int timeMS)
 {
-	return null;
+	set_motor(1, 127+(diff/2));
+	set_motor(2, 127-(diff/2));
+	sleep1(timeS, timeMS);
 }
