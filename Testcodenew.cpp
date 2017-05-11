@@ -70,8 +70,10 @@ int convToMot(int spd)
 int main()
 {
     init();
+    open_screen_stream ():
     while(true){
     take_picture();
+    update_screen ();
     lineRaw = new int[320];
     lineRaw = getCameraLine();
     lineW = new int[320];
