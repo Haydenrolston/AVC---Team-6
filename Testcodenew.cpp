@@ -2,19 +2,20 @@
 #include "E101.h"
 
 int BWThreshold = 80;
+int height=120;
 
-int* getCameraLine()
+int* getCameraLine() //gets single line of image taken by cam
 {
     int* line = new int[320];
     for(int i = 0; i<320; i++)
     {
-        line[i] = get_pixel(i,j,3);
+        line[i] = get_pixel(height,i,3);
     }
     return line;
     
 
 }
-int* getWhites(int* line)
+int* getWhites(int* line)//Converts line of pixels to one of 1=white and 0=black based off threshold
 {
       int* boolLine = new int[320];
       for(int i = 0; i<320; i++)
@@ -25,7 +26,7 @@ int* getWhites(int* line)
     return boolLine;
 }
 
-int* getLoc(int* line)
+int* getLoc(int* line)//Gets location of white line by defining where white line begins and ends
 {
       int startPos;
       int endPos;
@@ -42,7 +43,7 @@ int* getLoc(int* line)
     return loc;
 }
 
-int getTurnDiff(int* loc)
+int getTurnDiff(int* loc)//Gets error signal based off how far white line is from centre of image
 {
     int diff = 0;
     diff=(loc[0]+loc[1])/2;
@@ -50,13 +51,13 @@ int getTurnDiff(int* loc)
     return diff;
 }
 
-void drive(int diff, int timeS, int timeMS)
+void drive(int diff, int timeS, int timeMS)//Drives
 {
        set_motor(1,127-convToMot(diff)*ErrScale);
        set_motor(2, 127+convToMot(diff)*ErrScale);
        sleep1(timeS, timeMS);
 }
-int convToMot(int spd)
+int convToMot(int spd)//Fixed our motor problem
 {
     int result = 0;
     if(spd>=0){result=255-spd;}
