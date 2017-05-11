@@ -3,6 +3,8 @@
 
 int BWThreshold = 80;
 int height=120;
+int ErrScale = 0.5;
+int numWhitePixels = 0;
 
 int* getCameraLine() //gets single line of image taken by cam
 {
@@ -35,7 +37,7 @@ int* getLoc(int* line)//Gets location of white line by defining where white line
     for(int i = 0; i<320; i++)
     {
            if(line[i]==1 && inWhite==false){inWhite=true; startPos=i;}
-           if(line[i]==0 && inWhite=true){endPos=i; break;}
+           if(line[i]==0 && inWhite=true){endPos=i; if((endPos-startPos)>20){numWhitePixels = endPos-startPos;break;}else{inWhite=false;}}
         
     }
     loc[0]=startPos;
@@ -50,6 +52,14 @@ int getTurnDiff(int* loc)//Gets error signal based off how far white line is fro
     diff=diff-160;
     return diff;
 }
+int getError(int* line)//Testcode ignore
+{
+    int err = 0;
+    for(int i = 0; i<320; i++)
+    {
+          err = err+(i-160)*ErrScale;
+    }
+}
 
 void drive(int diff, int timeS, int timeMS)//Drives
 {
@@ -60,8 +70,8 @@ void drive(int diff, int timeS, int timeMS)//Drives
 int convToMot(int spd)//Fixed our motor problem
 {
     int result = 0;
-    if(spd>=0){result=255-spd;}
-    if(spd<0){result=(spd*-1)-255;}
+    if(spd>=0){result=254-spd;}
+    if(spd<0){result=(spd*-1)-254;}
     return result;
 }
 
