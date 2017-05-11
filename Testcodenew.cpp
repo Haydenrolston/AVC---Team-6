@@ -4,6 +4,8 @@
 int BWThreshold = 80;
 int height=120;
 int ErrScale = 0.5;
+int prevError = 0;
+int dErrScale = 0.2;
 int numWhitePixels = 0;
 
 int* getCameraLine() //gets single line of image taken by cam
@@ -63,8 +65,8 @@ int getError(int* line)//Testcode ignore
 
 void drive(int diff, int timeS, int timeMS)//Drives
 {
-       set_motor(1,127-convToMot(diff)*ErrScale);
-       set_motor(2, 127+convToMot(diff)*ErrScale);
+       set_motor(1,127-convToMot(diff));
+       set_motor(2, 127+convToMot(diff));
        sleep1(timeS, timeMS);
 }
 int convToMot(int spd)//Fixed our motor problem
@@ -92,7 +94,8 @@ int main()
     int* loc = new int[2];
     loc = getLoc(lineW);
     int spdDiff = getTurnDiff(loc);
-    drive(spdDiff,0,5000);
+    prevError = spdDiff;
+    drive((spdDiff*ErrScale),0,5000);
     }
     return 0;
 }
