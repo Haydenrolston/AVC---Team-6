@@ -52,9 +52,17 @@ int getTurnDiff(int* loc)
 
 void drive(int diff, int timeS, int timeMS)
 {
-       
+       set_motor(1,127-convToMot(diff)*ErrScale);
+       set_motor(2, 127+convToMot(diff)*ErrScale);
+       sleep1(timeS, timeMS);
 }
-
+int convToMot(int spd)
+{
+    int result = 0;
+    if(spd>=0){result=255-spd;}
+    if(spd<0){result=(spd*-1)-255;}
+    return result;
+}
 
 
 
@@ -62,8 +70,16 @@ void drive(int diff, int timeS, int timeMS)
 int main()
 {
     init();
+    while(true){
     take_picture();
     lineRaw = new int[320];
     lineRaw = getCameraLine();
+    lineW = new int[320];
+    lineW = getWhites(lineRaw);
+    int* loc = new int[2];
+    loc = getLoc(lineW);
+    int spdDiff = getTurnDiff(loc);
+    drive(spdDiff,0,5000);
+    }
     return 0;
 }
