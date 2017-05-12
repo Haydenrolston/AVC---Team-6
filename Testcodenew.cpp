@@ -7,6 +7,7 @@ int ErrScale = 0.5;
 int prevError = 0;
 int dErrScale = 0.2;
 int numWhitePixels = 0;
+int quadrant = 1;
 
 int* getCameraLine() //gets single line of image taken by cam
 {
@@ -62,13 +63,6 @@ int getError(int* line)//Testcode ignore
           err = err+(i-160)*ErrScale;
     }
 }
-
-void drive(int diff, int timeS, int timeMS)//Drives
-{
-       set_motor(1,127-convToMot(diff));
-       set_motor(2, 127+convToMot(diff));
-       sleep1(timeS, timeMS);
-}
 int convToMot(int spd)//Fixed our motor problem
 {
     int result = 0;
@@ -76,6 +70,27 @@ int convToMot(int spd)//Fixed our motor problem
     if(spd<0){result=(spd*-1)-254;}
     return result;
 }
+
+void drive(int diff, int timeS, int timeMS)//Drives
+{
+       set_motor(1,127-convToMot(diff));
+       set_motor(2, 127+convToMot(diff));
+       sleep1(timeS, timeMS);
+}
+void reverse(int spd, int timeS, int timeMS)
+{
+       set_motor(1,convToMot(-spd));
+       set_motor(2,convToMot(-spd));
+       sleep1(timeS, timeMS);
+}
+void turnLeft(int spd, int timeS, int timeMS)
+{
+    set_motor(1, convToMot(-spd));
+    set_motor(2, convToMot(spd));
+    sleep1(timeS, timeMS);
+}
+
+
 
 
 
@@ -94,8 +109,21 @@ int main()
     int* loc = new int[2];
     loc = getLoc(lineW);
     int spdDiff = getTurnDiff(loc);
+    
+    int dE = spdDiff-prevError;
     prevError = spdDiff;
-    drive((spdDiff*ErrScale),0,5000);
+    if(numWhitePixels<10 && quadrant == 1){
+           reverse(40,0,5000);
+    }else
+        if(numWhitePixels<10 && quadrant == 2){
+           reverse(40,0,5000);
+    }
+        else if(numWhitePixels>180)
+    {
+           quadrant = 2;
+           turnLeft(254,0,50000);
+    }
+    drive((spdDiff*ErrScale)+(dE*dErrScale),0,5000);
     }
     return 0;
 }
