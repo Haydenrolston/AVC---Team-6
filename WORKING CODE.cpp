@@ -9,6 +9,8 @@ double dErrScale = 0.2;
 int numWhitePixels = 0;
 int quadrant = 1;
 int speed = 100;
+int* readings = new int[5];
+
 int* getCameraLine() //gets single line of image taken by cam
 {
     int* line = new int[320];
@@ -95,6 +97,12 @@ void turnLeft(int spd, int timeS, int timeMS)
     set_motor(2, convToMot(spd));
     sleep1(timeS, timeMS);
 }
+void driveStraight(int spd, int timeS, int timeMS)
+{
+	set_motor(1, convToMot(-spd));
+	set_motor(1, convToMot(-spd));
+	sleep1(timeS, timeMS);
+}
 
 
 
@@ -106,6 +114,8 @@ int main()
     init();
     open_screen_stream();
     while(true){
+	    if(quandrant!=3)
+	    {
     take_picture();
     update_screen ();
     int* lineRaw = new int[320];
@@ -137,6 +147,19 @@ int main()
 
     drive(-(spdDiff*ErrScale),0,500);
 	}
+    }else if(quadrant == 3)
+	    {
+		    int sensorReading = 0;
+		for(int i = 0; i<5; i++)
+		{
+			sensorReading = sensorReading+read_analog(0);	
+			sleep1(0,100);
+		}
+		sensorReading = sensorReading/5;
+		sensorReading = 1-(sensorReading/1024);
+		driveStraight(sensorReading*255,0,10);
+	    }
+	    
     }
     return 0;
 }
