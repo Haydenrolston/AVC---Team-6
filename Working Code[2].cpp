@@ -11,6 +11,10 @@ int quadrant = 1;
 int speed = 100;
 int* readings = new int[5];
 
+int Q2prevErr = 0;
+int Q2dErrScale = 0.3;
+int Q2ErrScale = 0.5;
+
 int* getCameraLine() //gets single line of image taken by cam
 {
     int* line = new int[320];
@@ -126,7 +130,7 @@ int main()
     loc = getLoc(lineW);
     int spdDiff = getTurnDiff(loc);
     
-    int dE = spdDiff-prevError;
+    
     prevError = spdDiff;
    // if(numWhitePixels<10 && quadrant == 1){
    //        reverse(-40,0,5000);
@@ -143,21 +147,48 @@ int main()
     printf("Error: %d\n",spdDiff);
 	if(numWhitePixels==0){
 	//Do something
+		driveStraight(-127,0,250);
 	}else{
 
-    drive(-(spdDiff*ErrScale),0,500);
+    drive(-((spdDiff*ErrScale)+(dE*dErrScale)),0,250);
+		int dE = spdDiff-prevError;
 	}
     }else if(quadrant == 3)
 	    {
+		    //Sensor1 FrontFacing handler
 		    int sensorReading = 0;
+		    int sensorReading2 = 0;
+		    int sensorReading3 = 0;
 		for(int i = 0; i<5; i++)
 		{
-			sensorReading = sensorReading+read_analog(0);	
+			sensorReading = sensorReading+read_analog(0);
+			sensorReading2 = sensorReading2+read_analog(1);
+			sensorReading3 = sensorReading3+read_analog(2);
 			sleep1(0,100);
 		}
 		sensorReading = sensorReading/5;
-		sensorReading = 1-(sensorReading/1024);
-		driveStraight(sensorReading*255,0,10);
+		sensorReading2 = sensorReading2/5;
+		sensorReading3 = sensorReading3/5;    
+		//Checks both sides and sees which side is clear to turn into, if both are clear, turn left
+		//if both are blocked about turn
+		if(sensorReading>200){
+			if(sensorReading2>350 && sensorReading3>350){
+			turnLeft(254,0,500000);}
+			else if(sensorReading2>350){turnLeft(254,0,500000);}
+			else if(sensorReading3>350){turnLeft(-254,0,500000);}
+			else{turnLeft(254,1,0);}
+			
+		}else{//Drive straight through corridor command
+			int Q2Err = sensorReading2-sensorReading3;
+			Q2Err = Q2Err/1024;
+			printf("%d\n", Q2Err);
+			
+			drive(-((Q2Err*Q2ErrScale)+(Q2dErr*Q2dErrScale)),0,250);
+			Q2prevError = Q2Err;
+			
+			
+		}
+		
 	    }
 	    
     }
