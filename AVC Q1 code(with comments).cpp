@@ -11,65 +11,6 @@ int quadrant = 1;
 int speed = 100;
 int* readings = new int[5];
 
-int main()
-{
-    init();
-    open_screen_stream();
-    while(true){
-	    if(quandrant!=3)
-	    {
-    take_picture();
-    update_screen ();
-    int* lineRaw = new int[320];
-    lineRaw = getCameraLine();//get the middle row pixel(totally have 320 pixel)
-    int* lineW = new int[320];
-    lineW = getWhites(lineRaw);// convert the values got before into 1 or 0 (white or black)
-    int* loc = new int[2];
-    loc = getLoc(lineW);// get the position of the white line and pass it to get error method
-    int spdDiff = getTurnDiff(loc);
-    
-    int dE = spdDiff-prevError;
-    prevError = spdDiff;
-   // if(numWhitePixels<10 && quadrant == 1){
-   //        reverse(-40,0,5000);
-   // }else
-     //   if(numWhitePixels<10 && quadrant == 2){
-      //     reverse(-40,0,5000);
-   // }
-    //    else if(numWhitePixels>180)
-    //{
-     //      quadrant = 2;
-      //     turnLeft(-254,0,50000);
-    //}
-    printf("Num white pixels:%d\n",numWhitePixels);
-    printf("Error: %d\n",spdDiff);
-	if(numWhitePixels==0){
-	//Do something, turn back to find the white line but also need to change a few angle
-	}else{
-
-    drive(-(spdDiff*ErrScale),0,500);
-	}
-    }else if(quadrant == 3)
-	    {
-		    int sensorReading = 0;
-		for(int i = 0; i<5; i++)
-		{
-			sensorReading = sensorReading+read_analog(0);	
-			sleep1(0,100);
-		}
-		sensorReading = sensorReading/5;
-		sensorReading = 1-(sensorReading/1024);
-		driveStraight(sensorReading*255,0,10);
-	    }
-	    
-    }
-    return 0;
-}
-
-
-
-
-
 
 int* getCameraLine() //gets single line of image taken by cam
 {
@@ -183,3 +124,59 @@ void driveStraight(int spd, int timeS, int timeMS)
 }
 
 
+
+
+int main()
+{
+    init();
+    open_screen_stream();
+    while(true){
+	    if(quandrant!=3)
+	    {
+    take_picture();
+    update_screen ();
+    int* lineRaw = new int[320];
+    lineRaw = getCameraLine();//get the middle row pixel(totally have 320 pixel)
+    int* lineW = new int[320];
+    lineW = getWhites(lineRaw);// convert the values got before into 1 or 0 (white or black)
+    int* loc = new int[2];
+    loc = getLoc(lineW);// get the position of the white line and pass it to get error method
+    int spdDiff = getTurnDiff(loc);
+    
+    int dE = spdDiff-prevError;
+    prevError = spdDiff;
+   // if(numWhitePixels<10 && quadrant == 1){
+   //        reverse(-40,0,5000);
+   // }else
+     //   if(numWhitePixels<10 && quadrant == 2){
+      //     reverse(-40,0,5000);
+   // }
+    //    else if(numWhitePixels>180)
+    //{
+     //      quadrant = 2;
+      //     turnLeft(-254,0,50000);
+    //}
+    printf("Num white pixels:%d\n",numWhitePixels);
+    printf("Error: %d\n",spdDiff);
+	if(numWhitePixels==0){
+	//Do something, turn back to find the white line but also need to change a few angle
+	}else{
+
+    drive(-(spdDiff*ErrScale),0,500);
+	}
+    }else if(quadrant == 3)
+	    {
+		    int sensorReading = 0;
+		for(int i = 0; i<5; i++)
+		{
+			sensorReading = sensorReading+read_analog(0);	
+			sleep1(0,100);
+		}
+		sensorReading = sensorReading/5;
+		sensorReading = 1-(sensorReading/1024);
+		driveStraight(sensorReading*255,0,10);
+	    }
+	    
+    }
+    return 0;
+}
