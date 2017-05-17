@@ -6,14 +6,17 @@ int height=120;
 double ErrScale = 0.5;
 int prevError = 0;
 double dErrScale = 0.2;
+double drevErrScale = 1.0;
 int numWhitePixels = 0;
-int quadrant = 1;
-int speed = 100;
+int quadrant = 3;
+int speed = 140;
+int revSpeed = 64;
 int* readings = new int[5];
 
 int Q2prevErr = 0;
-int Q2dErrScale = 0.3;
-int Q2ErrScale = 0.5;
+double Q2dErrScale = 0.3;
+double Q2ErrScale = 0.5;
+int dE = 0;
 
 int* getCameraLine() //gets single line of image taken by cam
 {
@@ -77,7 +80,7 @@ int convToMot(int spd)//Fixed our motor problem
 {
     int result = 0;
     if(spd>=0){result=254-spd;}
-    if(spd<0){result=(spd*-1)-254;}
+    if(spd<0){result=(spd*-1)-254;}
     return result;
 }
 
@@ -91,8 +94,8 @@ void drive(int diff, int timeS, int timeMS)//Drives
 }
 void reverse(int spd, int timeS, int timeMS)
 {
-       set_motor(1,-(convToMot(-spd)));
-       set_motor(2,convToMot(-spd));
+       set_motor(1,(convToMot(-revSpeed-(prevError*drevErrScale))));
+       set_motor(2,convToMot(-revSpeed+(prevError*drevErrScale)));
        sleep1(timeS, timeMS);
 }
 void turnLeft(int spd, int timeS, int timeMS)
@@ -104,7 +107,7 @@ void turnLeft(int spd, int timeS, int timeMS)
 void driveStraight(int spd, int timeS, int timeMS)
 {
 	set_motor(1, convToMot(-spd));
-	set_motor(1, convToMot(-spd));
+	set_motor(1, convToMot(spd));
 	sleep1(timeS, timeMS);
 }
 
@@ -116,12 +119,12 @@ void driveStraight(int spd, int timeS, int timeMS)
 int main()
 {
     init();
-    open_screen_stream();
+    //open_screen_stream();
     while(true){
-	    if(quandrant!=3)
+	    if(quadrant!=3)
 	    {
     take_picture();
-    update_screen ();
+    //update_screen ();
     int* lineRaw = new int[320];
     lineRaw = getCameraLine();
     int* lineW = new int[320];
@@ -147,13 +150,13 @@ int main()
     printf("Error: %d\n",spdDiff);
 	if(numWhitePixels==0){
 	//Do something
-		driveStraight(-127,0,250);
+		reverse(0,0,100);
 	}else{
 
-    drive(-((spdDiff*ErrScale)+(dE*dErrScale)),0,250);
-		int dE = spdDiff-prevError;
+    drive(-((spdDiff*ErrScale)+(dE*dErrScale)),0,50);
+		 dE = spdDiff-prevError;
 	}
-    }else if(quadrant == 3)
+    }else if(quadrant == 3)///Q3 code begins here (a-mazing maze)
 	    {
 		    //Sensor1 FrontFacing handler
 		    int sensorReading = 0;
@@ -164,27 +167,30 @@ int main()
 			sensorReading = sensorReading+read_analog(0);
 			sensorReading2 = sensorReading2+read_analog(1);
 			sensorReading3 = sensorReading3+read_analog(2);
-			sleep1(0,100);
+			sleep1(0,50);
 		}
 		sensorReading = sensorReading/5;
 		sensorReading2 = sensorReading2/5;
-		sensorReading3 = sensorReading3/5;    
+		sensorReading3 = sensorReading3/5;
+		printf("Front: %d\n",sensorReading);
+		printf("Right: %d\n",sensorReading2);
+		printf("Left: %d\n", sensorReading3);    
 		//Checks both sides and sees which side is clear to turn into, if both are clear, turn left
 		//if both are blocked about turn
-		if(sensorReading>200){
-			if(sensorReading2>350 && sensorReading3>350){
+		if(sensorReading>400){
+			if(sensorReading2>400 && sensorReading3>400){
 			turnLeft(254,0,500000);}
-			else if(sensorReading2>350){turnLeft(254,0,500000);}
-			else if(sensorReading3>350){turnLeft(-254,0,500000);}
+			else if(sensorReading2>400){turnLeft(254,0,500000);}
+			else if(sensorReading3>400){turnLeft(-254,0,500000);}
 			else{turnLeft(254,1,0);}
 			
 		}else{//Drive straight through corridor command
 			int Q2Err = sensorReading2-sensorReading3;
 			Q2Err = Q2Err/1024;
 			printf("%d\n", Q2Err);
-			
+			int Q2dErr = Q2Err-Q2prevErr;
 			drive(-((Q2Err*Q2ErrScale)+(Q2dErr*Q2dErrScale)),0,250);
-			Q2prevError = Q2Err;
+			Q2prevErr = Q2Err;
 			
 			
 		}
