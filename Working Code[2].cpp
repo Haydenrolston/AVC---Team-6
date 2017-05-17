@@ -1,4 +1,4 @@
-#include <stdio.h>
+ #include <stdio.h>
 #include "E101.h"
 
 int BWThreshold = 127;
@@ -14,9 +14,13 @@ int revSpeed = 64;
 int* readings = new int[5];
 
 int Q2prevErr = 0;
-double Q2dErrScale = 0.3;
-double Q2ErrScale = 0.5;
+double Q2dErrScale = 0.4;
+double Q2ErrScale = 0.2;
 int dE = 0;
+int Q2SPEED = 70;
+
+int prevS2 = 0;
+int prevS3 = 0;
 
 int* getCameraLine() //gets single line of image taken by cam
 {
@@ -92,6 +96,15 @@ void drive(int diff, int timeS, int timeMS)//Drives
 	
        sleep1(timeS, timeMS);
 }
+
+void Q2drive(int diff, int timeS, int timeMS)//Drives
+{
+       set_motor(1,(convToMot(Q2SPEED-diff)));
+       set_motor(2, (convToMot(Q2SPEED+diff)));
+	printf("Motor1: %d\n", convToMot(diff));
+	
+       sleep1(timeS, timeMS);
+}
 void reverse(int spd, int timeS, int timeMS)
 {
        set_motor(1,(convToMot(-revSpeed-(prevError*drevErrScale))));
@@ -100,8 +113,8 @@ void reverse(int spd, int timeS, int timeMS)
 }
 void turnLeft(int spd, int timeS, int timeMS)
 {
-    set_motor(1, -(convToMot(-spd)));
-    set_motor(2, convToMot(spd));
+    set_motor(1, (convToMot((spd/2)+(spd/2))));
+    set_motor(2, convToMot((-spd/2)+(spd/2)));
     sleep1(timeS, timeMS);
 }
 void driveStraight(int spd, int timeS, int timeMS)
@@ -167,7 +180,7 @@ int main()
 			sensorReading = sensorReading+read_analog(0);
 			sensorReading2 = sensorReading2+read_analog(1);
 			sensorReading3 = sensorReading3+read_analog(2);
-			sleep1(0,50);
+			sleep1(0,40);
 		}
 		sensorReading = sensorReading/5;
 		sensorReading2 = sensorReading2/5;
@@ -177,20 +190,35 @@ int main()
 		printf("Left: %d\n", sensorReading3);    
 		//Checks both sides and sees which side is clear to turn into, if both are clear, turn left
 		//if both are blocked about turn
-		if(sensorReading>400){
-			if(sensorReading2>400 && sensorReading3>400){
-			turnLeft(254,0,500000);}
-			else if(sensorReading2>400){turnLeft(254,0,500000);}
-			else if(sensorReading3>400){turnLeft(-254,0,500000);}
-			else{turnLeft(254,1,0);}
+		if(sensorReading>350){
+			if(sensorReading2>350 && sensorReading3>350){
+			turnLeft(64,2,0);}
+			else if(sensorReading2>sensorReading3){Q2drive(30,2,0);}
+			else if(sensorReading3>sensorReading2){Q2drive(-30,2,0);}
+			else{Q2drive(-30,2,0);}
 			
 		}else{//Drive straight through corridor command
 			int Q2Err = sensorReading2-sensorReading3;
-			Q2Err = Q2Err/1024;
+			
 			printf("%d\n", Q2Err);
-			int Q2dErr = Q2Err-Q2prevErr;
-			drive(-((Q2Err*Q2ErrScale)+(Q2dErr*Q2dErrScale)),0,250);
+			int Q2dErr = (Q2Err-Q2prevErr);
+			if(sensorReading2<250||sensorReading3<250){
+			  if(sensorReading2<250){
+			    int Q2TERROR = prevS2-sensorReading3;
+			    Q2drive((Q2TERROR*Q2ErrScale),0,50);
+			  }else if(sensorReading3<250){
+			    int Q2TERROR = sensorReading2-prevS3;
+			    Q2drive((Q2TERROR*Q2ErrScale),0,50);
+			  }else{
+			   int Q2TERROR = prevS2-prevS3;
+			   Q2drive((Q2TERROR*Q2ErrScale),0,50);
+			  }
+			  
+			}else{
+			Q2drive(((Q2Err*Q2ErrScale)+(Q2dErr*Q2dErrScale)),0,50);}
 			Q2prevErr = Q2Err;
+			prevS2 = sensorReading2;
+			prevS3 = sensorReading3;
 			
 			
 		}
