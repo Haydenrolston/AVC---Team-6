@@ -1,3 +1,4 @@
+  
  #include <stdio.h>
 #include "E101.h"
 
@@ -15,12 +16,14 @@ int* readings = new int[5];
 
 int Q2prevErr = 0;
 double Q2dErrScale = 0.4;
-double Q2ErrScale = 0.2;
+double Q2ErrScale = 0.1;
 int dE = 0;
-int Q2SPEED = 70;
+int Q2SPEED = 100;
+int Q2ErrThreshold = 20; //TOUCH THIS AND I WILL RIP YOUR FUCKING HEAD OFF AND DROP KICK IT INTO THE NEXT FUCKING GALAXY
 
 int prevS2 = 0;
 int prevS3 = 0;
+int Q2Err = 0;
 
 int* getCameraLine() //gets single line of image taken by cam
 {
@@ -105,22 +108,53 @@ void Q2drive(int diff, int timeS, int timeMS)//Drives
 	
        sleep1(timeS, timeMS);
 }
-void reverse(int spd, int timeS, int timeMS)
+void reverse( int timeS, int timeMS)
 {
        set_motor(1,(convToMot(-revSpeed-(prevError*drevErrScale))));
        set_motor(2,convToMot(-revSpeed+(prevError*drevErrScale)));
        sleep1(timeS, timeMS);
 }
+void Q2reverse(int timeS, int timeMS){
+    
+       set_motor(1,(convToMot(-revSpeed+(Q2Err*ErrScale*0.5))));
+       set_motor(2,convToMot(-revSpeed-(Q2Err*ErrScale*0.5)));
+       sleep1(timeS, timeMS);
+  
+}
+void revLeft(int spd, int timeS, int timeMS)
+{
+    set_motor(1, (convToMot(-spd)));
+    set_motor(2, convToMot((-0)));
+    sleep1(timeS, timeMS);
+}
+void revRight(int spd, int timeS, int timeMS)
+{
+    set_motor(1, (convToMot(-20)));
+    set_motor(2, convToMot((-spd)));
+    sleep1(timeS, timeMS);
+}
+
 void turnLeft(int spd, int timeS, int timeMS)
 {
-    set_motor(1, (convToMot((spd/2)+(spd/2))));
-    set_motor(2, convToMot((-spd/2)+(spd/2)));
+    set_motor(1, (convToMot(spd)));
+    set_motor(2, convToMot((-30)));
+    sleep1(timeS, timeMS);
+}
+void turnRight(int spd, int timeS, int timeMS)
+{
+    set_motor(1, (convToMot(-30)));
+    set_motor(2, convToMot((spd)));
     sleep1(timeS, timeMS);
 }
 void driveStraight(int spd, int timeS, int timeMS)
 {
-	set_motor(1, convToMot(-spd));
 	set_motor(1, convToMot(spd));
+	set_motor(1, convToMot(spd));
+	sleep1(timeS, timeMS);
+}
+void stop(int timeS, int timeMS){
+    set_motor(1, convToMot(0));
+	set_motor(1, convToMot(0));
 	sleep1(timeS, timeMS);
 }
 
@@ -134,7 +168,7 @@ int main()
     init();
     //open_screen_stream();
     while(true){
-	    if(quadrant!=3)
+	    if(quadrant==2||quadrant==1)
 	    {
     take_picture();
     //update_screen ();
@@ -163,7 +197,7 @@ int main()
     printf("Error: %d\n",spdDiff);
 	if(numWhitePixels==0){
 	//Do something
-		reverse(0,0,100);
+		reverse(0,100);
 	}else{
 
     drive(-((spdDiff*ErrScale)+(dE*dErrScale)),0,50);
@@ -190,41 +224,56 @@ int main()
 		printf("Left: %d\n", sensorReading3);    
 		//Checks both sides and sees which side is clear to turn into, if both are clear, turn left
 		//if both are blocked about turn
-		if(sensorReading>350){
-			if(sensorReading2>350 && sensorReading3>350){
-			turnLeft(64,2,0);}
-			else if(sensorReading2>sensorReading3){Q2drive(30,2,0);}
-			else if(sensorReading3>sensorReading2){Q2drive(-30,2,0);}
-			else{Q2drive(-30,2,0);}
+		if(sensorReading>250){
+			if(sensorReading2<150){
+			 turnLeft(50,0,1000); 
+			}else if(sensorReading3<150){
+			 turnRight(50,0,1000); 
+			}
+			
+			
 			
 		}else{//Drive straight through corridor command
-			int Q2Err = sensorReading2-sensorReading3;
 			
-			printf("%d\n", Q2Err);
-			int Q2dErr = (Q2Err-Q2prevErr);
+			//if(sensorReading2>400){
+			  //revLeft(40,0,1000);
+			  //turnRight(100,0,2000);
+			//}
+			//if(sensorReading3>400){
+			  //revRight(40,0,1000);
+			  //turnLeft(80,0,2000);
+			//}
+			
 			if(sensorReading2<250||sensorReading3<250){
-			  if(sensorReading2<250){
-			    int Q2TERROR = prevS2-sensorReading3;
-			    Q2drive((Q2TERROR*Q2ErrScale),0,50);
-			  }else if(sensorReading3<250){
-			    int Q2TERROR = sensorReading2-prevS3;
-			    Q2drive((Q2TERROR*Q2ErrScale),0,50);
-			  }else{
-			   int Q2TERROR = prevS2-prevS3;
-			   Q2drive((Q2TERROR*Q2ErrScale),0,50);
-			  }
+			 if(sensorReading2<250){sensorReading2=prevS2; turnLeft(80,0,100);}
+			 if(sensorReading3<250){sensorReading3=prevS3;}
+			 if(sensorReading2<250&&sensorReading3<250){sensorReading2=prevS2;sensorReading3=prevS3;}
 			  
-			}else{
+			}
+			 Q2Err = sensorReading2-sensorReading3;
+			int Q2dErr = (Q2Err-Q2prevErr);
+			if(Q2dErr>Q2ErrThreshold){driveStraight(20,0,10);}else{
 			Q2drive(((Q2Err*Q2ErrScale)+(Q2dErr*Q2dErrScale)),0,50);}
+			
+			
+			
+			if(!sensorReading2<250){prevS2=sensorReading2+20;}
+			if(!sensorReading3<250){prevS3=sensorReading3+20;}
 			Q2prevErr = Q2Err;
-			prevS2 = sensorReading2;
-			prevS3 = sensorReading3;
+			
 			
 			
 		}
 		
+	    }else if(quadrant==-1){
+	     revLeft(80,0,10000);
+	     
+	     
+	      
 	    }
 	    
     }
     return 0;
 }
+ 
+ 
