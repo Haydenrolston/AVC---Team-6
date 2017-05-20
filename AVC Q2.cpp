@@ -57,10 +57,10 @@ int getError(int*lineWhite){
 
 // suppose pin 1 is left, pin 2 is right, turn 90 degrees(need to test in the lab)
 void turnLeft(){      
-		set_motor(1,254);//left wheel stop
-	    set_motor(2,50);
-		sleep1(0,500);
-		distance = 0;
+	set_motor(1,254);//left wheel stop
+	set_motor(2,50);
+	sleep1(0,500);
+	distance = 0;
 }
 
 void turnRight(){
@@ -81,10 +81,10 @@ void turnBack(){// turn back to the crossRoads
 }
 
 void driveStraight(){
-		set_motor(1, 50);
-	    set_motor(2, -50);
-		sleep1(0,500);
-		distance++; //suppose running with 50 speed in 500ms as one distance unit
+	set_motor(1, 50);
+	set_motor(2, -50);
+        sleep1(0,500);
+	distance++; //suppose running with 50 speed in 500ms as one distance unit
 }
 
 
