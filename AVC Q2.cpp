@@ -56,6 +56,8 @@ int getError(int*lineWhite){
 }
 
 // suppose pin 1 is left, pin 2 is right, turn 90 degrees(need to test in the lab)
+//I designed a function that converts the normal motor speeds (0 is stop, 254 is top speed) into these motor speeds to make it easy
+//if we used these it might lower confusion
 void turnLeft(){      
 	set_motor(1,254);//left wheel stop
 	set_motor(2,50);
@@ -91,7 +93,7 @@ void driveStraight(){
 int main()
 {
 	init();
-	open._screen_stream();
+	open._screen_stream();//Maybe it better to remove screen stream as it tends to lower the reaction time of the robot considerably.
 	while(true)
 	{
 		take_picture();
@@ -107,9 +109,12 @@ int main()
 		else if(whiteNumber == 0 && Error == 0){// blind alley
 			turnBack();
 			turnRight();// each time after turning back, turn right 
+				    //Maybe its better if it turns back and follows the line until it reaches the crossroads it came from?
 		}
 		else if(whiteNumber > 40 && Error <= 20 && Error >= -20){
-			driveStraight();
+			driveStraight();//Maybe instead of it driving straight it would follow the line and keep to it using Q2 code.
+					//as there is no way to know whether the turn will get it to be on the line perfectly
+					//its best to let the robot keep itself on the line intelligently.
 		}
 
 	}
