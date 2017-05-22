@@ -9,7 +9,7 @@ int prevError = 0;
 double dErrScale = 0.2;
 double drevErrScale = 1.0;
 int numWhitePixels = 0;
-int quadrant = 3;
+int quadrant = 2;
 int speed = 140;
 int revSpeed = 64;
 int* readings = new int[5];
@@ -19,7 +19,7 @@ double Q2dErrScale = 0.4;
 double Q2ErrScale = 0.1;
 int dE = 0;
 int Q2SPEED = 100;
-int Q2ErrThreshold = 20; //TOUCH THIS AND I WILL RIP YOUR FUCKING HEAD OFF AND DROP KICK IT INTO THE NEXT FUCKING GALAXY
+int Q2ErrThreshold = 20; //Do not touch Q4 code.
 
 int prevS2 = 0;
 int prevS3 = 0;
@@ -203,9 +203,9 @@ int main()
     drive(-((spdDiff*ErrScale)+(dE*dErrScale)),0,50);
 		 dE = spdDiff-prevError;
 	}
-    }else if(quadrant == 3)///Q3 code begins here (a-mazing maze)
+    }else if(quadrant == 3)///Q4 code begins here (a-mazing maze)
 	    {
-		    //Sensor1 FrontFacing handler
+		    //Sensors handler
 		    int sensorReading = 0;
 		    int sensorReading2 = 0;
 		    int sensorReading3 = 0;
