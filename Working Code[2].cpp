@@ -149,7 +149,7 @@ void turnRight(int spd, int timeS, int timeMS)
 void driveStraight(int spd, int timeS, int timeMS)
 {
 	set_motor(1, convToMot(spd));
-	set_motor(1, convToMot(spd));
+	set_motor(2, convToMot(spd));
 	sleep1(timeS, timeMS);
 }
 void stop(int timeS, int timeMS){
