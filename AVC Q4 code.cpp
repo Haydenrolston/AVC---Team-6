@@ -68,7 +68,7 @@ int main(){
 	init();
 	while(true){
 		take_picture();
-		if(getReds()){quadrant == 3}
+		if(getReds()){quadrant == 3; stop(2,0);}
 		if(quardrant == 3){
 			int FSensor;
 			int LSensor;
