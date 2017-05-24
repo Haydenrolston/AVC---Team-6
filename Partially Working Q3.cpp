@@ -3,7 +3,7 @@
 #include "E101.h"
 #include <math.h>
 
-int BWThreshold = 100;
+int BWThreshold = 80;
 int height=80;int dh = 130;
 double ErrScale = 0.8;
 int prevError = 0;
@@ -28,6 +28,8 @@ int prevS2 = 0;
 int prevS3 = 0;
 int Q2Err = 0;
 bool check = false;
+bool checkRight = false;
+bool checkLeft=false;
 
 int* getCameraLine(int h) //gets single line of image taken by cam
 {
@@ -35,10 +37,21 @@ int* getCameraLine(int h) //gets single line of image taken by cam
     for(int i = 0; i<320; i++)
     {
         line[i] = get_pixel(h,i,3);
+	
     }
     return line;
     
 
+}
+int getCVertical(int pos){
+  
+    int line = 0;
+    for(int i = 230; i<240; i++)
+    {
+	line =line+ get_pixel(i,pos,3);
+    }
+    return line/10;
+  
 }
 int getAvgWColor(int* line)
 {
@@ -64,19 +77,21 @@ int* getWhites(int* line)//Converts line of pixels to one of 1=white and 0=black
 {
       int* boolLine = new int[320];
       int numPix = 0;
+      int count = 0;
       for(int i = 0; i<320; i++)
       {
-            if(line[i]>=BWThreshold){boolLine[i]=1; numPix++;}else
-                if(line[i]<BWThreshold){boolLine[i]=0;}
+            if(line[i]>=BWThreshold){boolLine[i]=1; numPix++;if(count==2){printf("▓");count=0;}else{count++;}}else
+                if(line[i]<BWThreshold){boolLine[i]=0; if(count==2){printf("░");count=0;}else{count++;}}
       }
+      printf("\n");
       numActWPix=numPix;
     return boolLine;
 }
 
 int* getLoc(int* line)//Gets location of white line by defining where white line begins and ends
 {
-      int startPos;
-      int endPos;
+      int startPos = 0;
+      int endPos = 320;
     bool inWhite = false;
     int* loc = new int[2];
 	numWhitePixels=0;
@@ -121,7 +136,7 @@ void drive(int diff, int timeS, int timeMS)//Drives
 {
        set_motor(1,(convToMot(speed-diff)));
        set_motor(2, (convToMot(speed+diff)));
-	printf("Motor1: %d\n", convToMot(diff));
+	//printf("Motor1: %d\n", convToMot(diff));
 	
        sleep1(timeS, timeMS);
 }
@@ -130,10 +145,10 @@ void Q2drive(int diff, int timeS, int timeMS)//Drives
 {
        set_motor(1,(convToMot(Q2SPEED-diff)));
        set_motor(2, (convToMot(Q2SPEED+diff)));
-	printf("Motor1: %d\n", convToMot(diff));
+	//printf("Motor1: %d\n", convToMot(diff));
 	
        sleep1(timeS, timeMS);
-}
+}bool check2 = false;
 void reverse( int timeS, int timeMS)
 {
        set_motor(1,(convToMot(-revSpeed-(prevError*drevErrScale))));
@@ -246,6 +261,19 @@ int getSpdDiff(){
   return spdDiff;
 }
 
+int checkLine(int h, int* line){
+  
+    int* line1 = new int[320];
+    line1=line;
+    int result = 0;
+    for(int i = h;i<h+10;i++){
+      result = line1[i]+result;
+      
+    }
+    return result/10;
+  
+}
+
 
 
 
@@ -275,26 +303,26 @@ int main()
     int* locd = new int[2];
     locd = getLoc(linedW);
     loc = getLoc(lineW);
-    printf("ACTUAL PIXELS: %d\n",numActWPix);
+    //printf("ACTUAL PIXELS: %d\n",numActWPix);
     if(quadrant==0){
 	
 	int IRSensorReading = frontalSensorReading();
 	if(IRSensorReading<150){quadrant=1;}else{sleep1(1,50000); }
 	
-	printf("Test: %d\n",0);
+	//printf("Test: %d\n",0);
 	
     }
     if(numActWPix>300){
       if(counter1 >5 && quadrant!=2){
 	
 	quadrant=2;
-	speed=0;
+	speed=50;
 	stop(2,0);
 	printf("Transitioning: Q2-Q3");
 	sleep1(2,0);
 	turnRight(80,0,50000);
 	driveStraight(80,1,0);
-	speed=50; height=80; dh=130;
+	speed=50; height=120; dh=140;
       }else{counter1++;}
     }
     
@@ -319,8 +347,8 @@ int main()
      //      quadrant = 2;
       //     turnLeft(-254,0,50000);
     //}
-    printf("Num white pixels:%d\n",numWhitePixels);
-    printf("Error: %d\n",spdDiff);
+    //printf("Num white pixels:%d\n",numWhitePixels);
+    //printf("Error: %d\n",spdDiff);
 	if(numActWPix==0){
 	//Do something
 		reverse(0,100);
@@ -334,44 +362,46 @@ int main()
          int spdDiff = getTurnDiff(loc);
 	 int postErrDiff = getTurnDiff(locd);
 	 //speed = (int)(80*abs((1/spdDiff)/200));
+	 
+	 int leftv = getCVertical(0);
+	 int rightv = getCVertical(240);
+	 //printf("LEFT: %d\n",leftv);
+	 //printf("RIGHT: %d\n",rightv);
 	 prevError = postErrDiff;
-	 if(numActWPix>315)
+	 if(numWhitePixels>200){speed=30;}else{speed=50;}
+	   
+	 if(numActWPix>250)
 	 {
 	   printf("Junction found: TUrning left");
 	    driveStraight(80,0,500000);
-	    turnLeft(180,0,250000);
+	    turnLeft(180,0,275000);
 	    driveStraight(-80,0,250000);
-	 }else if(numActWPix<5){
+	 }else if(numWhitePixels>160 && spdDiff<-20){
+	    driveStraight(80,0,500000);
+	    turnLeft(180,0,275000);
+	    driveStraight(-80,0,250000);
+	 }else if(numWhitePixels>160 && spdDiff<20){
+	    driveStraight(80,0,500000);
+	    turnRight(180,0,275000);
+	    driveStraight(-80,0,250000);
+	 }
+	 
+	 
+	 
+	 else if(numActWPix<10){
 	   printf("End point found, about turning");
 	   driveStraight(80,0,500000);
 	    turnAround(180,0,550000);
 	    driveStraight(-80,0,250000);
 	 }
-	 else if(numActWPix>100&&spdDiff<-300)
-	 {
-		while(true){
-		    spdDiff=getSpdDiff();
-		  if(spdDiff<20&&spdDiff>-20){break;}
-		  drive(-(spdDiff*ErrScale*0.5),0,50);
-		  
-		}
-	 }
-	   
-	 
-	 else if(numActWPix>100&&spdDiff>300)
-	 {
-	      while(true){
-		    spdDiff=getSpdDiff();
-		  if(spdDiff<20&&spdDiff>-20){break;}
-		  drive(-(spdDiff*ErrScale*0.5),0,50);
-		  
-		}
 	 
 	   
-	 }
+	 
+	 
 	 
 	 else{
-	  
+	    //printf("ERRVALUE: %d\n",spdDiff);
+	    
 	    drive(-((spdDiff*ErrScale)-(dE*dErrScale)+(Integral*dIScale)),0,50);
 		 dE = postErrDiff-spdDiff;
 		 Integral=Integral+spdDiff;
@@ -451,4 +481,3 @@ int main()
     }
     return 0;
 }
- 
