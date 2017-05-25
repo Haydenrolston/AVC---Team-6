@@ -99,12 +99,12 @@ int main(){
 			else{// reach to turn corner 
 				if(Error > 250){//there has road at right
 					driveStraight(80,0,500000);
-	                turnLeft(180,0,250000);
+	                turnRight(180,0,250000);
 	                driveStraight(-80,0,250000);
 				}
 				else if(Error < -250){//there has road at left
 					driveStraight(80,0,500000);
-	                turnRight(180,0,250000);
+	                turnLeft(180,0,250000);
 	                driveStraight(-80,0,250000);
 				}
 			}
