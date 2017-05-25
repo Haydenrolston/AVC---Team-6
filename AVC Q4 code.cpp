@@ -89,7 +89,7 @@ int main(){
 			UI.println("Error: " + Error);
 			}
 			if(FSensor >= 250){// there has road in front of the robot
-				driveQ4(Error, 0, 500000);
+				driveQ3(Error, 0, 500000);
 			}
 			// I think that is hard for the robto to turn around in the maze, so i choose to use turn back
 			else if(FSensor < 250 && Rsensor < 150 && LSensor < 150){// reach to a terminal,
