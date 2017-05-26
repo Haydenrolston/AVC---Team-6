@@ -12,7 +12,7 @@ double drevErrScale = 2.0;
 int numWhitePixels = 0;
 int numActWPix = 0;
 int quadrant = 0;
-int speed = 130;
+int speed = 100;
 int revSpeed = 64;
 int* readings = new int[5];
 int counter1 = 0;
@@ -28,8 +28,13 @@ int prevS2 = 0;
 int prevS3 = 0;
 int Q2Err = 0;
 bool check = false;
+bool check1 = false;
+bool rightleft = false;
 bool checkRight = false;
 bool checkLeft=false;
+int sideCheckThreshold = 70;
+int numSidePix = 0;
+int count3 = 0;
 
 int* getCameraLine(int h) //gets single line of image taken by cam
 {
@@ -43,6 +48,39 @@ int* getCameraLine(int h) //gets single line of image taken by cam
     
 
 }
+int* getColumnPixel(int column){// get Column white pixels 
+	int* VLine = new int[240];
+	for(int i = 0; i < 240; i++){
+		VLine[i] = get_pixel(i, column, 3);
+	}
+	return VLine;
+}
+
+bool ScanVLine(int* column){
+	int startPos = 0;
+	int endPos = 0;
+	bool inWhite = false;
+	int sidePix=0;
+	for(int i = 0; i < 240; i++){
+		//if(inWhite == false && column[i] > BWThreshold){
+			//startPos = i;
+			//inWhite = true;
+		//}
+		//else if(inWhite == true && column[i] < BWThreshold){
+			//endPos = i;
+			//if(endPos - startPos > sideCheckThreshold){// if there has a white line that includes over 20 white pixels, then return true
+				
+			  
+			//  return true;
+			//}
+			//else{inWhite = false;}
+	  if(column[i]>BWThreshold){sidePix++;}
+	}
+	numSidePix=sidePix;
+	if(sidePix>sideCheckThreshold){return true;}else{return false;}
+	
+	
+}
 int getCVertical(int pos){
   
     int line = 0;
@@ -52,6 +90,36 @@ int getCVertical(int pos){
     }
     return line/10;
   
+}
+bool getReds(){
+	int* lineR = new int[320];
+	int* lineG = new int[320];
+	int* lineB = new int[320];
+	int redAvg = 0;
+	int greenAvg = 0;
+	int blueAvg = 0;
+	take_picture();
+	for(int i = 0; i < 320; i++){
+		lineR[i] = get_pixel(height, i, 0);
+		lineG[i] = get_pixel(height, i, 1);
+		lineB[i] = get_pixel(height, i, 2);
+	}
+	for(int j = 0; j < 320; j++){
+		redAvg = redAvg + lineR[j];
+		greenAvg = greenAvg + lineG[j];
+		blueAvg = blueAvg + lineB[j];
+	}
+	redAvg = redAvg/320;
+	greenAvg = greenAvg/320;
+	blueAvg = blueAvg/320;
+	printf("RED:%d\n", redAvg);
+	printf("BLUE:%d\n", blueAvg);
+	printf("GREEN:%d\n", greenAvg);
+	if(redAvg >= 150 && greenAvg <= 80 && blueAvg <= 80){
+		  printf("ITS RED CHANGE TO Q4");
+	  return true;
+	}
+	return false;
 }
 int getAvgWColor(int* line)
 {
@@ -80,10 +148,10 @@ int* getWhites(int* line)//Converts line of pixels to one of 1=white and 0=black
       int count = 0;
       for(int i = 0; i<320; i++)
       {
-            if(line[i]>=BWThreshold){boolLine[i]=1; numPix++;if(count==2){printf("▓");count=0;}else{count++;}}else
-                if(line[i]<BWThreshold){boolLine[i]=0; if(count==2){printf("░");count=0;}else{count++;}}
+            if(line[i]>=BWThreshold){boolLine[i]=1; numPix++;if(count==2){count=0;}else{count++;}}else
+                if(line[i]<BWThreshold){boolLine[i]=0; if(count==2){count=0;}else{count++;}}
       }
-      printf("\n");
+      
       numActWPix=numPix;
     return boolLine;
 }
@@ -151,8 +219,8 @@ void Q2drive(int diff, int timeS, int timeMS)//Drives
 }bool check2 = false;
 void reverse( int timeS, int timeMS)
 {
-       set_motor(1,(convToMot(-revSpeed-(prevError*drevErrScale))));
-       set_motor(2,convToMot(-revSpeed+(prevError*drevErrScale)));
+       set_motor(1,(convToMot(-revSpeed+(prevError*drevErrScale))));
+       set_motor(2,convToMot(-revSpeed-(prevError*drevErrScale)));
        sleep1(timeS, timeMS);
 }
 void Q2reverse(int timeS, int timeMS){
@@ -177,12 +245,14 @@ void revRight(int spd, int timeS, int timeMS)
 
 void turnRight(int spd, int timeS, int timeMS)
 {
+  printf("TURNING RIGHT");
     set_motor(1, (convToMot(spd)));
     set_motor(2, convToMot((-spd)));
     sleep1(timeS, timeMS);
 }
 void turnLeft(int spd, int timeS, int timeMS)
 {
+    printf("TURNING LEFT");
     set_motor(1, (convToMot(-spd)));
     set_motor(2, convToMot((spd)));
     sleep1(timeS, timeMS);
@@ -304,6 +374,12 @@ int main()
     locd = getLoc(linedW);
     loc = getLoc(lineW);
     //printf("ACTUAL PIXELS: %d\n",numActWPix);
+    if(numActWPix<80&&check1==true && quadrant==1){quadrant=2;}
+     if(getReds()==true){
+       //if(quadrant==2){
+      quadrant=3;
+      printf("it is Q4.\n");
+    }
     if(quadrant==0){
 	
 	int IRSensorReading = frontalSensorReading();
@@ -312,19 +388,24 @@ int main()
 	//printf("Test: %d\n",0);
 	
     }
-    if(numActWPix>300){
-      if(counter1 >5 && quadrant!=2){
+    if(numActWPix>300){// reach to the crossRoads 
+      if(quadrant==1){
 	
-	quadrant=2;
+	check1=true;
 	speed=50;
-	stop(2,0);
+	driveStraight(50,0,500000);
 	printf("Transitioning: Q2-Q3");
-	sleep1(2,0);
-	turnRight(80,0,50000);
-	driveStraight(80,1,0);
-	speed=50; height=120; dh=140;
-      }else{counter1++;}
+	//sleep1(2,0);
+	//turnRight(80,0,50000);
+	
+	
+	dE=0; Integral=0;
+	speed=50; height=80; dh=120;
+	ErrScale=1.4; dErrScale=1.3; dIScale=0.1;
+	
+      }
     }
+   
     
       
 	    if(quadrant==2||quadrant==1)
@@ -369,30 +450,44 @@ int main()
 	 //printf("RIGHT: %d\n",rightv);
 	 prevError = postErrDiff;
 	 if(numWhitePixels>200){speed=30;}else{speed=50;}
-	   
-	 if(numActWPix>250)
+	   int* leftColumn = new int[240];
+		leftColumn= getColumnPixel(0);// left most column
+		
+		int* rightColumn = new int[240];
+		rightColumn= getColumnPixel(319);// right most column
+		rightleft=false;
+		bool leftBranch = ScanVLine(leftColumn);
+		printf("LEFT: %d\n",numSidePix); numSidePix=0;
+		rightleft=true;
+	    bool rightBranch = ScanVLine(rightColumn);
+	    printf("RIGHT: %d\n",numSidePix); numSidePix=0;
+	 if(numActWPix>280 ||(leftBranch&&rightBranch))// have two junction at two sides
 	 {
 	   printf("Junction found: TUrning left");
 	    driveStraight(80,0,500000);
-	    turnLeft(180,0,275000);
-	    driveStraight(-80,0,250000);
-	 }else if(numWhitePixels>160 && spdDiff<-20){
-	    driveStraight(80,0,500000);
-	    turnLeft(180,0,275000);
-	    driveStraight(-80,0,250000);
-	 }else if(numWhitePixels>160 && spdDiff<20){
-	    driveStraight(80,0,500000);
-	    turnRight(180,0,275000);
-	    driveStraight(-80,0,250000);
+	    turnLeft(150,0,225000);
+	    driveStraight(-80,0,200000);
+	 }else if(leftBranch && numActWPix<200 && dE<-30){
+	   
+	    driveStraight(80,0,450000);
+	    turnLeft(180,0,225000);
+	    driveStraight(-80,0,220000);
+	 }else if(rightBranch && numActWPix<170 && dE>30){
+	   if(count3==0){count3=1;sleep1(0,9000);}else if(count3==1){
+	    driveStraight(80,0,450000);
+	    turnRight(180,0,225000);
+	    driveStraight(-80,0,200000);
+	    count3=0; 
+	  }
 	 }
 	 
 	 
 	 
 	 else if(numActWPix<10){
 	   printf("End point found, about turning");
-	   driveStraight(80,0,500000);
-	    turnAround(180,0,550000);
-	    driveStraight(-80,0,250000);
+	   driveStraight(80,0,300000);
+	    turnAround(180,0,500000);
+	    driveStraight(-80,0,200000);
 	 }
 	 
 	   
@@ -401,14 +496,18 @@ int main()
 	 
 	 else{
 	    //printf("ERRVALUE: %d\n",spdDiff);
-	    
+	    if(abs(-((spdDiff*ErrScale)-(dE*dErrScale)+(Integral*dIScale)))<30){
 	    drive(-((spdDiff*ErrScale)-(dE*dErrScale)+(Integral*dIScale)),0,50);
 		 dE = postErrDiff-spdDiff;
 		 Integral=Integral+spdDiff;
+	      
+	    }else{dE=0;Integral=0;}
+	    }
 	  
-	 }
+	 //}
     }
-    }else if(quadrant == 3)///Q3 code begins here (a-mazing maze)
+    }
+    if(quadrant == 3)///Q3 code begins here (a-mazing maze)
 	    {
 		    //Sensor1 FrontFacing handler
 		    int frontalSensor = 0;
@@ -431,9 +530,9 @@ int main()
 		//if both are blocked about turn
 		if(frontalSensor>250){
 			if(rightSensor<150){
-			 turnLeft(50,0,1000); 
-			}else if(leftSensor<150){
 			 turnRight(50,0,1000); 
+			}else if(leftSensor<150){
+			 turnLeft(50,0,1000); 
 			}
 			
 			
@@ -450,7 +549,7 @@ int main()
 			//}
 			
 			if(rightSensor<250||leftSensor<250){
-			 if(rightSensor<250){rightSensor=prevS2; turnLeft(80,0,100);}
+			 if(rightSensor<250){rightSensor=prevS2; turnRight(80,0,100);}
 			 if(leftSensor<250){leftSensor=prevS3;}
 			 if(rightSensor<250&&leftSensor<250){rightSensor=prevS2;leftSensor=prevS3;}
 			  
