@@ -372,7 +372,7 @@ int checkLine(int h, int* line){
 
 
 
-
+bool past = false;
 
 int main()
 {
@@ -399,11 +399,29 @@ int main()
     loc = getLoc(lineW);
     //printf("ACTUAL PIXELS: %d\n",numActWPix);
     BWThreshold=getCalibratedBWThresh();
-    if(numActWPix<100&&check1==true && quadrant==1){quadrant=2;}
+    if(numActWPix<50&&check1==true && quadrant==1){quadrant=2;}
      if(getReds()==true){
-       //if(quadrant==2){
+       if(quadrant==2){
+      
+      past=true;
+      printf("it is Q4.\n");}
+      if(quadrant==3 && !past){
+	if(frontalSensorReading()<200){
+	 while(frontalSensorReading()<200){
+	   stop(0,50);
+	 }
+	}
+	while(frontalSensorReading()>200){
+	   stop(0,50); 
+	}
+	if(frontalSensorReading()<200){
+	 past=true; 
+	}
+      }
+    }
+    if(quadrant==2 && past && !getReds()){
       quadrant=3;
-      printf("it is Q4.\n");
+      past=false;
     }
     if(quadrant==0){
 	
@@ -418,7 +436,7 @@ int main()
 	
 	check1=true;
 	speed=50;
-	driveStraight(50,0,500000);
+	driveStraight(50,1,0);
 	printf("Transitioning: Q2-Q3");
 	//sleep1(2,0);
 	//turnRight(80,0,50000);
@@ -553,16 +571,16 @@ int main()
 		printf("Left: %d\n", leftSensor);    
 		//Checks both sides and sees which side is clear to turn into, if both are clear, turn left
 		//if both are blocked about turn
-		if(frontalSensor>250){
-			if(rightSensor<150){
-			 turnRight(50,0,1000); 
-			}else if(leftSensor<150){
-			 turnLeft(50,0,1000); 
-			}
+		//if(frontalSensor>250){
+			//if(rightSensor<150){
+			/// turnRight(50,0,1000); 
+			//}else if(leftSensor<150){
+			// turnLeft(50,0,1000); 
+			//}
 			
 			
 			
-		}else{//Drive straight through corridor command
+		//Drive straight through corridor command
 			
 			//if(rightSensor>400){
 			  //revLeft(40,0,1000);
@@ -574,7 +592,7 @@ int main()
 			//}
 			
 			if(rightSensor<250||leftSensor<250){
-			 if(rightSensor<250){rightSensor=prevS2; turnRight(80,0,100);}
+			 if(rightSensor<250){}
 			 if(leftSensor<250){leftSensor=prevS3;}
 			 if(rightSensor<250&&leftSensor<250){rightSensor=prevS2;leftSensor=prevS3;}
 			  
@@ -592,7 +610,7 @@ int main()
 			
 			
 			
-		}
+		
 		
 	    }else if(quadrant==-1){
 	     if(numActWPix!=0){quadrant=0;}
