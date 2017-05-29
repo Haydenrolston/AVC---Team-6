@@ -3,39 +3,39 @@
 #include "E101.h"
 #include <math.h>
 
-int BWThreshold = 50;
-int height=80;int dh = 130;
-double ErrScale = 0.8;
-int prevError = 0;
-double dErrScale = 0.8;
-double drevErrScale = 2.0;
-int numWhitePixels = 0;
-int numActWPix = 0;
-int quadrant = 0;
-int speed = 100;
-int revSpeed = 64;
-int* readings = new int[5];
-int counter1 = 0;
-int Q2prevErr = 0;
-double Q2dErrScale = 0.4;
-double Q2ErrScale = 0.1;
-int dE = 0;
-int Q2SPEED = 100;
-int Q2ErrThreshold = 20; //TOUCH THIS AND I WILL RIP YOUR FUCKING HEAD OFF AND DROP KICK IT INTO THE NEXT FUCKING GALAXY
-int Integral = 0;
-int dIScale = 0.1;
-int prevS2 = 0;
-int prevS3 = 0;
-int Q2Err = 0;
-bool check = false;
-bool check1 = false;
-bool rightleft = false;
-bool checkRight = false;
-bool checkLeft=false;
-bool justTurned = false;
-int sideCheckThreshold = 90;
-int numSidePix = 0;
-int count3 = 0;
+int BWThreshold = 50;//USING DO CARE
+int height=80;int dh = 130;//USING DO CARE
+double ErrScale = 0.5;//USING DO CARE
+int prevError = 0;//USING DO CARE
+double dErrScale = 0.3;//USING DO CARE
+double drevErrScale = 2.0;//USING DO CARE
+int numWhitePixels = 0;//USING DO CARE
+int numActWPix = 0;//USING DO CARE
+int quadrant = 0;//USING DO CARE THIS ONE ESPECIALLY DO NOT TOUCH COMRADE?
+int speed = 100;//USING DO CARE
+int revSpeed = 64;//USING DO CARE
+int* readings = new int[5];//USING DO CARE
+int counter1 = 0;//USING DO CARE
+int Q2prevErr = 0;//USING DO CARE
+double Q2dErrScale = 0.4;//USING DO CARE
+double Q2ErrScale = 0.1;//USING DO CARE
+int dE = 0;//USING DO CARE
+int Q2SPEED = 100; //Not using dont care
+int Q2ErrThreshold = 20; //Not using dont care
+int Integral = 0; //USING DO CARE
+int dIScale = 0.1;//USING DO CARE
+int prevS2 = 0; //USING DO CARE
+int prevS3 = 0;//USING DO CARE
+int Q2Err = 0;//USING DO CARE
+bool check = false;//USING DO CARE
+bool check1 = false;//USING DO CARE
+bool rightleft = false; //Not using dont give a shite
+bool checkRight = false; //NOt using dont give a f*ck
+bool checkLeft=false; //Not using dont give a shizzle mah nizzle for rizzle yo
+bool justTurned = false;//USING DO CARE
+int sideCheckThreshold = 90;//USING DO CARE
+int numSidePix = 0;//USING DO CARE
+int count3 = 0;//USING DO CARE
 
 int* getCameraLine(int h) //gets single line of image taken by cam
 {
