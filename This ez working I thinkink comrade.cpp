@@ -32,6 +32,7 @@ bool check1 = false;
 bool rightleft = false;
 bool checkRight = false;
 bool checkLeft=false;
+bool justTurned = false;
 int sideCheckThreshold = 90;
 int numSidePix = 0;
 int count3 = 0;
@@ -329,11 +330,11 @@ void openGate()
 {
 	while(true){
 	connect_to_server("130.195.006.196",1024);
-	char* gitgud1 = new char[24];
+	char* messageFromServer = new char[24];
 	send_to_server("Please");
-	receive_from_server(gitgud1);
-	if(gitgud1!=NULL){printf(gitgud1);
-	send_to_server(gitgud1); break;}
+	receive_from_server(messageFromServer);
+	if(messageFromServer!=NULL){printf(messageFromServer);
+	send_to_server(messageFromServer); break;}
 	
 	
   }
@@ -492,6 +493,14 @@ int main()
 	    driveStraight(80,0,500000);
 	    turnLeft(150,0,225000);
 	    driveStraight(-80,0,200000);
+	    justTurned=true;
+	    
+	 }else if((numActWPix>100 && numActWPix<160) && rightBranch && counter1>20){
+	   counter1=0;
+	   printf("RIGHT TURN\n");
+	    driveStraight(80,0,500000);
+	    turnRight(150,0,225000);
+	    driveStraight(-80,0,200000);
 	 }
 	 
 	 
@@ -517,6 +526,8 @@ int main()
 	      
 	    }else{dE=0;Integral=0;drive(-((spdDiff*ErrScale)-(dE*dErrScale)+(Integral*dIScale)),0,50);}
 	    }
+	    if(justTurned==true){counter1++;}
+	    if(counter1>40){justTurned=false;counter1=0;}
 	  
 	 //}
     }
