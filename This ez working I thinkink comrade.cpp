@@ -5,9 +5,9 @@
 
 int BWThreshold = 50;//USING DO CARE
 int height=80;int dh = 130;//USING DO CARE
-double ErrScale = 0.5;//USING DO CARE
+double ErrScale = 0.3;//USING DO CARE
 int prevError = 0;//USING DO CARE
-double dErrScale = 0.3;//USING DO CARE
+double dErrScale = 0.9;//USING DO CARE
 double drevErrScale = 2.0;//USING DO CARE
 int numWhitePixels = 0;//USING DO CARE
 int numActWPix = 0;//USING DO CARE
@@ -23,7 +23,7 @@ int dE = 0;//USING DO CARE
 int Q2SPEED = 100; //Not using dont care
 int Q2ErrThreshold = 20; //Not using dont care
 int Integral = 0; //USING DO CARE
-int dIScale = 0.1;//USING DO CARE
+int dIScale = 0.6;//USING DO CARE
 int prevS2 = 0; //USING DO CARE
 int prevS3 = 0;//USING DO CARE
 int Q2Err = 0;//USING DO CARE
