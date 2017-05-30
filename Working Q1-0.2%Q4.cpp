@@ -19,8 +19,8 @@ int Q2prevErr = 0;//Not using DONT CARE
 int Q2dE = 0; //USING DO CARE
 double Q2dErrScale = 0.08;//USING DO CARE
 double Q2ErrScale = 0.15;//USING DO CARE
-double Q2dIscale = 0.0;
-int Q2Integral = 0;
+double Q2dIscale = 0.1;
+int Q2Integral = 0.0;
 int dE = 0;//USING DO CARE
 int Q2SPEED = 50; //USING DO CARE COMPRENDEZ?
 int Q2ErrThreshold = 50; //Am using DO CARE
@@ -142,7 +142,7 @@ bool getReds(){
 	//printf("RED:%d\n", redAvg);
 	//printf("BLUE:%d\n", blueAvg);
 	//printf("GREEN:%d\n", greenAvg);
-	if(redAvg >= 150 && greenAvg <= 80 && blueAvg <= 80){
+	if(redAvg >= 190 && greenAvg <= 80 && blueAvg <= 80){
 		  printf("ITS RED CHANGE TO Q4");
 	  return true;
 	}
@@ -407,6 +407,7 @@ int main()
        if(quadrant==2){
       
       past=true;
+      
       printf("it is Q4.\n");
 	
 	}
@@ -448,8 +449,8 @@ int main()
 	
 	
 	dE=0; Integral=0;
-	speed=50; height=80; dh=100;
-	ErrScale=0.7; dErrScale=0.7; dIScale=0.4;
+	speed=45; height=80; dh=100;
+	ErrScale=0.8; dErrScale=0.9; dIScale=0.8;
 	
       }
     }
@@ -510,7 +511,7 @@ int main()
 	    bool rightBranch = ScanVLine(rightColumn);
 	    printf("RIGHT: %d\n",numSidePix); numSidePix=0;
 	    printf("NUMBER OF WHITE PIXELS ####: %d\n",numActWPix);
-	 if(numActWPix>319)// have two junction at two sides
+	 if(numActWPix>300)// have two junction at two sides
 	 {
 	   printf("Junction found: TUrning left");
 	    driveStraight(80,0,500000);
@@ -518,7 +519,7 @@ int main()
 	    driveStraight(-80,0,200000);
 	    justTurned=true;
 	    
-	 }else if((numActWPix>100 && numActWPix<160) && rightBranch && counter1>20){
+	 }else if((numActWPix>100 && numActWPix<130) && rightBranch && counter1>20){
 	   counter1=0;
 	   printf("RIGHT TURN\n");
 	    driveStraight(80,0,500000);
@@ -542,7 +543,7 @@ int main()
 	 
 	 else{
 	    //printf("ERRVALUE: %d\n",spdDiff);
-	    if(abs(-((spdDiff*ErrScale)+(dE*dErrScale)+(Integral*dIScale)))<90){
+	    if(abs(-((spdDiff*ErrScale)+(dE*dErrScale)+(Integral*dIScale)))<320){
 	    drive(-((spdDiff*ErrScale)+(dE*dErrScale)+(Integral*dIScale)),0,50);
 		 dE = postErrDiff-spdDiff;
 		 Integral=Integral+spdDiff;
@@ -601,7 +602,17 @@ int main()
 			Q2dE=Q2Err-Q2prevErr;
 			
 			 Q2drive((int)(-Q2Err*Q2ErrScale)-(int)(Q2dE*Q2dErrScale)+(int)(Q2Integral*Q2dIscale),0,10);
-			Q2Integral=Q2Integral+Q2Err*Q2dIscale;}else{Q2drive((int)(-Q2prevErr*Q2ErrScale),0,10);}
+			Q2Integral=Q2Integral+Q2Err*Q2dIscale;}else{
+			  if(leftSensor<150){
+			   int telemetry = 550-rightSensor;
+			   Q2drive(telemetry*Q2ErrScale,0,10);
+			  }else if(rightSensor<150){
+			   int telemetry= 550-leftSensor;
+			   Q2drive(telemetry*Q2ErrScale,0,10);
+			  }
+			  
+			  
+			}
 			
 		}else 
 		if(leftSensor<150){
@@ -609,12 +620,12 @@ int main()
 		}else if(rightSensor<150){
 		  turnRight(100,0,200000); Q2Integral=0;
 		}else{
-			int Q2Err=leftSensor-rightSensor;
-			Q2dE=Q2Err-Q2prevErr;
-			printf("DOIGN THE WRONG THING");
-			 Q2drive((int)(-Q2Err*Q2ErrScale)-(int)(Q2dE*Q2dErrScale)+(int)(Q2Integral*Q2dIscale),0,10);
-			Q2Integral=Q2Integral+Q2Err*Q2dIscale;
-			Q2prevErr=Q2Err;Q2Integral=0;
+			//int Q2Err=leftSensor-rightSensor;
+			//Q2dE=Q2Err-Q2prevErr;
+			//printf("DOIGN THE WRONG THING");
+			 //Q2drive((int)(-Q2Err*Q2ErrScale)-(int)(Q2dE*Q2dErrScale)+(int)(Q2Integral*Q2dIscale*2),0,10);
+			//Q2Integral=Q2Integral+Q2Err*Q2dIscale;
+			//Q2prevErr=Q2Err;
 		}
 		
 	    }else if(quadrant==-1){
