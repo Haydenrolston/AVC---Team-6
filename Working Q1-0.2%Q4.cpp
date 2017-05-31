@@ -142,7 +142,7 @@ bool getReds(){
 	//printf("RED:%d\n", redAvg);
 	//printf("BLUE:%d\n", blueAvg);
 	//printf("GREEN:%d\n", greenAvg);
-	if(redAvg >= 190 && greenAvg <= 80 && blueAvg <= 80){
+	if(redAvg >= 140 && greenAvg <= 80 && blueAvg <= 80){
 		  printf("ITS RED CHANGE TO Q4");
 	  return true;
 	}
@@ -450,7 +450,7 @@ int main()
 	
 	dE=0; Integral=0;
 	speed=45; height=80; dh=100;
-	ErrScale=0.8; dErrScale=0.9; dIScale=0.8;
+	ErrScale=0.75; dErrScale=1; dIScale=0.8;
 	
       }
     }
