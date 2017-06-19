@@ -31,8 +31,8 @@ int prevS3 = 0;//USING DO CARE
 int Q2Err = 0;//USING DO CARE
 bool check = false;//USING DO CARE
 bool check1 = false;//USING DO CARE
-bool rightleft = false; //Not using dont give a shite
-bool checkRight = false; //NOt using dont give a f*ck
+bool rightleft = false; //Not using 
+bool checkRight = false; //NOt using 
 bool checkLeft=false; //Not using dont give a shizzle mah nizzle for rizzle yo
 bool justTurned = false;//USING DO CARE
 int sideCheckThreshold = 90;//USING DO CARE
@@ -438,7 +438,7 @@ int main()
 	
     }
     if(numActWPix>300){// reach to the crossRoads 
-      if(quadrant==1){
+      if(quadrant==1){ 
 	
 	check1=true;
 	speed=50;
@@ -463,7 +463,7 @@ int main()
     int spdDiff = getTurnDiff(loc);
     int postErrDiff = getTurnDiff(locd);
     
-    if(quadrant==1){
+    if(quadrant==1){ //Q2 code here
     prevError = postErrDiff;
     
    // if(numWhitePixels<10 && quadrant == 1){
@@ -488,7 +488,7 @@ int main()
 		Integral=Integral+spdDiff;
 		 dE = postErrDiff-spdDiff;
 	}
-    }else if (quadrant==2){
+    }else if (quadrant==2){ //Q3 code here
          int spdDiff = getTurnDiff(loc);
 	 int postErrDiff = getTurnDiff(locd);
 	 //speed = (int)(80*abs((1/spdDiff)/200));
@@ -556,7 +556,7 @@ int main()
 	 //}
     }
     }
-    if(quadrant == 3)///Q3 code begins here (a-mazing maze)
+    if(quadrant == 3)///Q4 code begins here (a-mazing maze)
 	    {
 		    //Sensor1 FrontFacing handler
 		    int frontalSensor = 0;
